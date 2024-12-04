@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player</title>
+    <title>Video Player with History</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
             padding: 0;
             background-color: #f4f4f9;
         }
-        h1 {
+        h1, h2 {
             margin: 20px 0;
             color: #333;
         }
@@ -44,6 +44,37 @@
             height: 450px;
             border: none;
         }
+        .history-container {
+            margin: 20px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .history-item span {
+            flex: 1;
+            text-align: left;
+            font-size: 16px;
+            color: #333;
+        }
+        .delete-icon {
+            background-color: #FF0000;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 16px;
+        }
+        .delete-icon:hover {
+            background-color: #cc0000;
+        }
     </style>
 </head>
 <body>
@@ -53,18 +84,68 @@
     <button onclick="playVideo()">Play Video</button>
     <div id="videoContainer"></div>
 
-    <script>
-        function playVideo() {
-            const videoLink = document.getElementById("videoLink").value;
-            const videoContainer = document.getElementById("videoContainer");
+    <h2>History</h2>
+    <div class="history-container" id="historyContainer"></div>
 
-            if (videoLink.trim() === "") {
-                alert("Please paste a valid iframe link.");
+    <script>
+        // Load history from localStorage
+        const loadHistory = () => {
+            const history = JSON.parse(localStorage.getItem('iframeHistory')) || [];
+            const historyContainer = document.getElementById('historyContainer');
+            historyContainer.innerHTML = '';
+
+            history.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+
+                const span = document.createElement('span');
+                span.textContent = item;
+
+                const button = document.createElement('button');
+                button.className = 'delete-icon';
+                button.textContent = 'X';
+                button.onclick = () => deleteHistory(index);
+
+                div.appendChild(span);
+                div.appendChild(button);
+                historyContainer.appendChild(div);
+            });
+        };
+
+        // Save a new iframe to history
+        const saveToHistory = (iframe) => {
+            const history = JSON.parse(localStorage.getItem('iframeHistory')) || [];
+            history.push(iframe);
+            localStorage.setItem('iframeHistory', JSON.stringify(history));
+            loadHistory();
+        };
+
+        // Delete a specific iframe from history
+        const deleteHistory = (index) => {
+            const history = JSON.parse(localStorage.getItem('iframeHistory')) || [];
+            history.splice(index, 1);
+            localStorage.setItem('iframeHistory', JSON.stringify(history));
+            loadHistory();
+        };
+
+        // Play video and save to history
+        const playVideo = () => {
+            const videoLink = document.getElementById('videoLink').value.trim();
+            const videoContainer = document.getElementById('videoContainer');
+
+            if (!videoLink.startsWith('<iframe') || !videoLink.endsWith('</iframe>')) {
+                alert('Please paste a valid iframe embed code.');
                 return;
             }
 
             videoContainer.innerHTML = videoLink;
-        }
+
+            // Save to history
+            saveToHistory(videoLink);
+        };
+
+        // Load history on page load
+        window.onload = loadHistory;
     </script>
 </body>
 </html>
