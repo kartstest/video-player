@@ -10,20 +10,23 @@
             text-align: center;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f9;
+            background-color: #000;
+            color: #fff;
         }
         h1, h2 {
             margin: 20px 0;
-            color: #333;
+            color: #fff;
         }
         input {
             padding: 10px;
             width: 60%;
             max-width: 500px;
-            border: 1px solid #ccc;
+            border: 1px solid #555;
             border-radius: 5px;
             margin-bottom: 20px;
             font-size: 16px;
+            background-color: #222;
+            color: #fff;
         }
         button {
             padding: 10px 20px;
@@ -51,17 +54,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #fff;
+            background-color: #222;
             padding: 10px;
             margin: 10px 0;
-            border: 1px solid #ccc;
+            border: 1px solid #555;
             border-radius: 5px;
         }
         .history-item span {
             flex: 1;
             text-align: left;
             font-size: 16px;
-            color: #333;
+            color: #fff;
+            word-break: break-all;
         }
         .delete-icon {
             background-color: #FF0000;
@@ -71,9 +75,17 @@
             cursor: pointer;
             padding: 5px 10px;
             font-size: 16px;
+            margin-left: 10px;
         }
         .delete-icon:hover {
             background-color: #cc0000;
+        }
+        #clearHistoryBtn {
+            background-color: #dc3545;
+            margin-bottom: 20px;
+        }
+        #clearHistoryBtn:hover {
+            background-color: #a71d2a;
         }
     </style>
 </head>
@@ -85,6 +97,7 @@
     <div id="videoContainer"></div>
 
     <h2>History</h2>
+    <button id="clearHistoryBtn" onclick="clearHistory()">Clear History</button>
     <div class="history-container" id="historyContainer"></div>
 
     <script>
@@ -94,6 +107,11 @@
             const historyContainer = document.getElementById('historyContainer');
             historyContainer.innerHTML = '';
 
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<p>No history yet.</p>';
+                return;
+            }
+
             history.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
@@ -101,13 +119,13 @@
                 const span = document.createElement('span');
                 span.textContent = item;
 
-                const button = document.createElement('button');
-                button.className = 'delete-icon';
-                button.textContent = 'X';
-                button.onclick = () => deleteHistory(index);
+                const btnDelete = document.createElement('button');
+                btnDelete.className = 'delete-icon';
+                btnDelete.textContent = 'X';
+                btnDelete.onclick = () => deleteHistory(index);
 
                 div.appendChild(span);
-                div.appendChild(button);
+                div.appendChild(btnDelete);
                 historyContainer.appendChild(div);
             });
         };
@@ -128,6 +146,14 @@
             loadHistory();
         };
 
+        // Clear entire history
+        const clearHistory = () => {
+            if (confirm('Are you sure you want to clear the entire history?')) {
+                localStorage.removeItem('iframeHistory');
+                loadHistory();
+            }
+        };
+
         // Play video and save to history
         const playVideo = () => {
             const videoLink = document.getElementById('videoLink').value.trim();
@@ -139,9 +165,8 @@
             }
 
             videoContainer.innerHTML = videoLink;
-
-            // Save to history
             saveToHistory(videoLink);
+            document.getElementById('videoLink').value = '';
         };
 
         // Load history on page load
