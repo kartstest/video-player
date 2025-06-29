@@ -1,176 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player with History</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            color: #fff;
-        }
-        h1, h2 {
-            margin: 20px 0;
-            color: #fff;
-        }
-        input {
-            padding: 10px;
-            width: 60%;
-            max-width: 500px;
-            border: 1px solid #555;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            font-size: 16px;
-            background-color: #222;
-            color: #fff;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        iframe {
-            margin-top: 20px;
-            width: 80%;
-            max-width: 800px;
-            height: 450px;
-            border: none;
-        }
-        .history-container {
-            margin: 20px;
-        }
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #222;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #555;
-            border-radius: 5px;
-        }
-        .history-item span {
-            flex: 1;
-            text-align: left;
-            font-size: 16px;
-            color: #fff;
-            word-break: break-all;
-        }
-        .delete-icon {
-            background-color: #FF0000;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            padding: 5px 10px;
-            font-size: 16px;
-            margin-left: 10px;
-        }
-        .delete-icon:hover {
-            background-color: #cc0000;
-        }
-        #clearHistoryBtn {
-            background-color: #dc3545;
-            margin-bottom: 20px;
-        }
-        #clearHistoryBtn:hover {
-            background-color: #a71d2a;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Player with History</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+    }
+    h1 {
+      margin: 20px 0;
+      color: #fff;
+      cursor: pointer;
+    }
+    h2 {
+      margin: 20px 0;
+      color: #fff;
+    }
+    input {
+      padding: 10px;
+      width: 60%;
+      max-width: 400px;
+      border: 1px solid #555;
+      border-radius: 5px;
+      font-size: 16px;
+      background-color: #222;
+      color: #fff;
+    }
+    button {
+      padding: 10px 20px;
+      margin-left: 5px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    iframe {
+      margin-top: 20px;
+      width: 80%;
+      max-width: 800px;
+      height: 450px;
+      border: none;
+    }
+    .history-container {
+      margin: 20px;
+    }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #222;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #555;
+      border-radius: 5px;
+    }
+    .history-item span {
+      flex: 1;
+      text-align: left;
+      font-size: 16px;
+      color: #fff;
+      word-break: break-all;
+    }
+    .delete-icon {
+      background-color: #FF0000;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      padding: 5px 10px;
+      font-size: 16px;
+      margin-left: 10px;
+    }
+    .delete-icon:hover {
+      background-color: #cc0000;
+    }
+    #clearHistoryBtn {
+      background-color: #dc3545;
+      margin-bottom: 20px;
+    }
+    #clearHistoryBtn:hover {
+      background-color: #a71d2a;
+    }
+    #historyToggleContainer {
+      margin: 20px;
+    }
+    #historyToggle {
+      transform: scale(1.5);
+      margin-left: 10px;
+      vertical-align: middle;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <h1>Video Player</h1>
-    <input type="text" id="videoLink" placeholder="Paste iframe link here">
-    <br>
+  <!-- 2. Home/Refresh button -->
+  <h1 id="homeButton">Video Player</h1>
+
+  <!-- 3. Input + paste-from-clipboard + Play -->
+  <div>
+    <input
+      type="text"
+      id="videoLink"
+      placeholder="Paste iframe link here"
+      autocomplete="off"
+    />
+    <button onclick="pasteFromClipboard()">📋 Paste</button>
     <button onclick="playVideo()">Play Video</button>
-    <div id="videoContainer"></div>
+  </div>
 
-    <h2>History</h2>
-    <button id="clearHistoryBtn" onclick="clearHistory()">Clear History</button>
-    <div class="history-container" id="historyContainer"></div>
+  <div id="videoContainer"></div>
 
-    <script>
-        // Load history from localStorage
-        const loadHistory = () => {
-            const history = JSON.parse(localStorage.getItem('iframeHistory')) || [];
-            const historyContainer = document.getElementById('historyContainer');
-            historyContainer.innerHTML = '';
+  <h2>History</h2>
+  <!-- 1. Toggle history on/off -->
+  <div id="historyToggleContainer">
+    <label for="historyToggle">
+      Enable History
+      <input type="checkbox" id="historyToggle" />
+    </label>
+  </div>
+  <button id="clearHistoryBtn" onclick="clearHistory()">Clear History</button>
+  <div class="history-container" id="historyContainer"></div>
 
-            if (history.length === 0) {
-                historyContainer.innerHTML = '<p>No history yet.</p>';
-                return;
-            }
+  <script>
+    // Initialize settings
+    const HISTORY_KEY = 'iframeHistory';
+    const TOGGLE_KEY = 'historyEnabled';
 
-            history.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
+    // Load history-enabled setting
+    const historyToggle = document.getElementById('historyToggle');
+    historyToggle.checked = JSON.parse(localStorage.getItem(TOGGLE_KEY)) ?? true;
+    historyToggle.addEventListener('change', () => {
+      localStorage.setItem(TOGGLE_KEY, JSON.stringify(historyToggle.checked));
+      loadHistory();
+    });
 
-                const span = document.createElement('span');
-                span.textContent = item;
+    // 2. Home button resets player and input
+    document.getElementById('homeButton').addEventListener('click', () => {
+      document.getElementById('videoContainer').innerHTML = '';
+      document.getElementById('videoLink').value = '';
+    });
 
-                const btnDelete = document.createElement('button');
-                btnDelete.className = 'delete-icon';
-                btnDelete.textContent = 'X';
-                btnDelete.onclick = () => deleteHistory(index);
+    // 3. Paste from clipboard
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('videoLink').value = text;
+      } catch (err) {
+        alert('Failed to read clipboard: ' + err);
+      }
+    }
 
-                div.appendChild(span);
-                div.appendChild(btnDelete);
-                historyContainer.appendChild(div);
-            });
-        };
+    // 4. Trigger Play on Enter
+    document
+      .getElementById('videoLink')
+      .addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          playVideo();
+        }
+      });
 
-        // Save a new iframe to history
-        const saveToHistory = (iframe) => {
-            const history = JSON.parse(localStorage.getItem('iframeHistory')) || [];
-            history.push(iframe);
-            localStorage.setItem('iframeHistory', JSON.stringify(history));
-            loadHistory();
-        };
+    // Load history from localStorage
+    function loadHistory() {
+      const enabled = JSON.parse(localStorage.getItem(TOGGLE_KEY));
+      const historyContainer = document.getElementById('historyContainer');
+      const clearBtn = document.getElementById('clearHistoryBtn');
+      if (!enabled) {
+        historyContainer.innerHTML = '<p>History is turned off.</p>';
+        clearBtn.style.display = 'none';
+        return;
+      }
+      clearBtn.style.display = 'inline-block';
 
-        // Delete a specific iframe from history
-        const deleteHistory = (index) => {
-            const history = JSON.parse(localStorage.getItem('iframeHistory')) || [];
-            history.splice(index, 1);
-            localStorage.setItem('iframeHistory', JSON.stringify(history));
-            loadHistory();
-        };
+      const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      historyContainer.innerHTML = '';
+      if (history.length === 0) {
+        historyContainer.innerHTML = '<p>No history yet.</p>';
+        return;
+      }
 
-        // Clear entire history
-        const clearHistory = () => {
-            if (confirm('Are you sure you want to clear the entire history?')) {
-                localStorage.removeItem('iframeHistory');
-                loadHistory();
-            }
-        };
+      history.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
 
-        // Play video and save to history
-        const playVideo = () => {
-            const videoLink = document.getElementById('videoLink').value.trim();
-            const videoContainer = document.getElementById('videoContainer');
+        const span = document.createElement('span');
+        span.textContent = item;
 
-            if (!videoLink.startsWith('<iframe') || !videoLink.endsWith('</iframe>')) {
-                alert('Please paste a valid iframe embed code.');
-                return;
-            }
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'delete-icon';
+        btnDelete.textContent = 'X';
+        btnDelete.onclick = () => deleteHistory(index);
 
-            videoContainer.innerHTML = videoLink;
-            saveToHistory(videoLink);
-            document.getElementById('videoLink').value = '';
-        };
+        div.appendChild(span);
+        div.appendChild(btnDelete);
+        historyContainer.appendChild(div);
+      });
+    }
 
-        // Load history on page load
-        window.onload = loadHistory;
-    </script>
+    // Save a new iframe to history
+    function saveToHistory(iframe) {
+      if (!JSON.parse(localStorage.getItem(TOGGLE_KEY))) return; // skip if disabled
+
+      const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      history.push(iframe);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      loadHistory();
+    }
+
+    // Delete a specific iframe from history
+    function deleteHistory(index) {
+      const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      history.splice(index, 1);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      loadHistory();
+    }
+
+    // Clear entire history
+    function clearHistory() {
+      if (
+        confirm('Are you sure you want to clear the entire history?')
+      ) {
+        localStorage.removeItem(HISTORY_KEY);
+        loadHistory();
+      }
+    }
+
+    // Play video and save to history
+    function playVideo() {
+      const input = document.getElementById('videoLink');
+      const videoLink = input.value.trim();
+      const videoContainer = document.getElementById('videoContainer');
+
+      if (!videoLink) {
+        alert('Please enter an iframe link first.');
+        return;
+      }
+      if (!videoLink.startsWith('<iframe') || !videoLink.endsWith('</iframe>')) {
+        alert('Please paste a valid iframe embed code.');
+        return;
+      }
+      videoContainer.innerHTML = videoLink;
+      saveToHistory(videoLink);
+      input.value = '';
+    }
+
+    // On page load
+    window.onload = loadHistory;
+  </script>
 </body>
 </html>
