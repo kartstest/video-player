@@ -115,19 +115,29 @@ a {
 <button id="goTopBtn">⬆</button>
 
 <script>
+/* ================= CONFIG ================= */
 const HISTORY_KEY = 'iframeHistory';
 
+/* ================= ELEMENTS ================= */
 const input = document.getElementById('videoLink');
 const videoContainer = document.getElementById('videoContainer');
 const goTopBtn = document.getElementById('goTopBtn');
 
-/* ---------- Helpers ---------- */
+/* ================= HELPERS ================= */
 function extractSrc(iframe) {
-  const m = iframe.match(/src=["']([^"']+)["']/);
-  return m ? m[1] : iframe;
+  const match = iframe.match(/src=["']([^"']+)["']/);
+  return match ? match[1] : iframe;
 }
 
-/* ---------- Clipboard ---------- */
+/* ================= ENTER TO PLAY ================= */
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    playVideo();
+  }
+});
+
+/* ================= CLIPBOARD ================= */
 async function pasteFromClipboard() {
   try {
     input.value = await navigator.clipboard.readText();
@@ -136,12 +146,12 @@ async function pasteFromClipboard() {
   }
 }
 
-/* ---------- Play Video ---------- */
+/* ================= PLAY VIDEO ================= */
 function playVideo(iframeOverride = null) {
   const iframe = iframeOverride || input.value.trim();
 
   if (!iframe.startsWith('<iframe')) {
-    alert('Paste a valid iframe embed code');
+    alert('Please paste a valid iframe embed code');
     return;
   }
 
@@ -153,19 +163,19 @@ function playVideo(iframeOverride = null) {
     src: extractSrc(iframe),
     time: Date.now()
   });
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
   input.value = '';
 }
 
-/* ---------- Replay from History ---------- */
-const replay = localStorage.getItem('replayIframe');
-if (replay) {
-  playVideo(replay);
+/* ================= REPLAY FROM HISTORY ================= */
+const replayIframe = localStorage.getItem('replayIframe');
+if (replayIframe) {
+  playVideo(replayIframe);
   localStorage.removeItem('replayIframe');
 }
 
-/* ---------- UI ---------- */
+/* ================= UI ACTIONS ================= */
 document.getElementById('homeBtn').onclick = () => {
   videoContainer.innerHTML = '';
   input.value = '';
